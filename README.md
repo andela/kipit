@@ -1,0 +1,2 @@
+# kipit
+Personal finance management.
