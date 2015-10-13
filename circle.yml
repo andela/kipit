@@ -1,0 +1,15 @@
+machine:
+  node:
+    version: 0.12.0
+  services:
+    - postgres
+
+deployment:
+  staging:
+    branch: staging
+    heroku:
+      appname: kipit-app-staging
+
+dependencies:
+  cache_directories:
+    - "node_modules"
