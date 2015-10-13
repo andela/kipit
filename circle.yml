@@ -2,7 +2,7 @@ machine:
   node:
     version: 0.12.0
   services:
-    - postgres
+    - postgresql
 
 deployment:
   staging:
