@@ -1,0 +1,28 @@
+{
+
+	"root" : true,
+
+	"blockBindings": true,
+        "forOf": true,
+        "jsx": true
+    },
+
+    "rules": {
+        "semi": 2
+    },
+
+    "env": {
+        "browser": true,
+        "node": true,
+        "es6" : true
+    },
+
+    "globals": {
+        "global-var1": false,
+        "global-var2": false
+    },
+
+    "plugins" : [
+
+    ]
+}
