@@ -1,28 +1,41 @@
 {
+  "root" : true,
+  
+  "ecmaFeatures":{
+    "blockBindings": true,
+    "forOf": true,
+    "jsx": true,
+    "modules": true
+  },
 
-	"root" : true,
+  "rules": {
+    "semi": 2,
+    "curly": 2,
+    "eqeqeq": [2, "smart"],
+    "indent": [2, 2, {"SwitchCase": 1}],
+    "camelcase": [2, {"properties": "always"}],
+    "brace-style": [2, "stroustrup", { "allowSingleLine": true }],
+    "key-spacing": [2, {"beforeColon": true, "afterColon": true}],
+    "comma-style": [2, "last"],
+    "no-inline-comments": 2,
+    "quotes": [2, "double", "avoid-escape"],
+    "comma-dangle": [2, "never"],
+    "object-curly-spacing": [2, "always", {"objectsInObjects": false, "arraysInObjects": false}],
+    "spaced-comment": [2, "always"],
+    "no-unused-vars": 0
+  },
 
-	"blockBindings": true,
-        "forOf": true,
-        "jsx": true
-    },
+  "env": {
+    "browser": true,
+    "node": true,
+    "es6" : true,
+    "jasmine": true,
+    "jquery": true
+  },
 
-    "rules": {
-        "semi": 2
-    },
-
-    "env": {
-        "browser": true,
-        "node": true,
-        "es6" : true
-    },
-
-    "globals": {
-        "global-var1": false,
-        "global-var2": false
-    },
-
-    "plugins" : [
-
-    ]
+  "globals": {
+    "describe": true,
+    "beforeEach": true,
+    "expect": true
+   }
 }
