@@ -22,5 +22,11 @@
   "bugs": {
     "url": "https://github.com/andela/kipit/issues"
   },
-  "homepage": "https://github.com/andela/kipit#readme"
+  "homepage": "https://github.com/andela/kipit#readme",
+  "devDependencies": {
+    "express": "^4.13.3",
+    "pg": "^4.4.3",
+    "jasmine": "~2.3.2",
+    "supertest": "~1.1.0"
+  }
 }
