@@ -1,17 +1,17 @@
 // definition of config object for postgres database
-config = {
+var config = {
 	development :{
 	  host: 'localhost',
-	  user: 'user',
-	  password: 'password',
+	  user: 'ubuntu',
+	  password: '',
 	  database: 'kipit',
 	  port :5432
 	},
-// staging config object
-	staging:{
+// test config object
+	test:{
 		host: 'localhost',
 	  user: 'ubuntu',
-	  password: 'dumbledore',
+	  password: '',
 	  database: 'circle_test',
 	  port :5432
 	}

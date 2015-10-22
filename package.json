@@ -23,8 +23,12 @@
     "url": "https://github.com/andela/kipit/issues"
   },
   "homepage": "https://github.com/andela/kipit#readme",
-  "devDependencies": {
+  "dependencies": {
     "express": "^4.13.3",
     "pg": "^4.4.3"
+  },
+  "devDependencies": {
+    "path": "^0.12.7",
+    "supertest": "^1.1.0"
   }
 }
