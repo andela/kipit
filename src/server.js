@@ -1,6 +1,6 @@
 // require modules
-var express = require('express');
-var db = require('./config/database');
+var express = require("express");
+var db = require("./config/database");
 var app = express();
 
 // listen on server
