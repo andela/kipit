@@ -1,20 +1,14 @@
-var db_config = require("./config");
+var db_config = require("../../../src/config/config"),
+    path = require("path");
 describe("Database", function() {
     describe("Application", function() {
-    	beforeEach(function(){
-			var node_env = process.env.NODE_ENV;
-		});
-
+        beforeEach(function() {
+            var node_env = process.env.NODE_ENV,
+                databaseURI = process.env.KIPIT_DATABASE_URI,
+                databaseName = path.basename(databaseURI);
+        });
         it("should be connected to the correct database.", function() {
-        	if (node_env === 'development'){
-            	expect(db_config[node_env].database).toBe('');
-        	} else if (node_env === 'test') {
-        		expect(db_config[node_env].database).toBe('');
-        	} else if (node_env === 'staging') {
-        		expect(db_config[node_env].database).toBe('');
-        	} else if (node_env === 'production') {
-        		expect(db_config[node_env].database).toBe('');
-        	}
+            expect(db_config[node_env].database).toEqual(databaseName);
         });
     });
 });

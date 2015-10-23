@@ -1,5 +1,5 @@
 var request = require("supertest"),
-    app = require("./server");
+    app = require("../../../src/server");
 describe("Server", function() {
     describe("should return appropraite server response.", function() {
         it("Should response to /", function(done) {
