@@ -16,4 +16,5 @@ var config = {
     port: 5432
   }
 };
+
 module.exports = config;
