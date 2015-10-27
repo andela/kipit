@@ -129,9 +129,8 @@ The footer should contain any information about **Breaking Changes** and is also
 A detailed explanation can be found in this [article](http://adamsimpson.net/writing/git-commit-template). You can get a sample template [here](https://gist.github.com/Linell/bd8100c4e04348c7966d).
 
 ### <a name="sctmp"></a> Setting Up The Git Commit Message Template
-A project template [.gitmessage.txt](https://github.com/andela/Kipit/blob/staging/.gitmessage.txt) is provided for use.
 
-- Copy the *project template* into a local directory e.g /path/to/.gitmessage.txt
+- Create a *project template* in a local directory e.g /path/to/.gitmessage.txt
 - Run **git config --local commit.template /path/to/.gitmessage.txt*** or edit **~/.gitconfig and add template = /path/to/.gitmessage.txt** under the *[commit]* block.
 - Setup git default editor by running 
   '''
