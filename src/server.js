@@ -1,10 +1,6 @@
-// require modules
-var express = require("express");
-var db = require("./config/database");
-var app = express();
+var app = require("./config/express");
 
 // listen on server
-var port = process.env.PORT;
+var port = process.env.PORT || 3400;
 var server = app.listen(port);
-
-module.exports = app;
+console.log("Listening on port " + port);
