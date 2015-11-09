@@ -1,9 +1,9 @@
 var path = require("path");
 var relativePath = path.relative("spec/unit/database", "src/config/config");
 var dbConfig = require(relativePath);
-var databaseURI, databaseName;
 describe("Database", function() {
   describe("Application", function() {
+    var databaseURI, databaseName;
     beforeEach(function() {
       databaseURI = process.env.KIPIT_DATABASE_URI;
       databaseName = path.basename(databaseURI);
