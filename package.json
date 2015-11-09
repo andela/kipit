@@ -2,10 +2,10 @@
   "name": "kipit",
   "version": "1.0.0",
   "description": "Personal finance application.",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "echo 'No tests yet.'"
+    "start": "node server.js",
+    "test" : "NODE_ENV=test jasmine --spec"
   },
   "repository": {
     "type": "git",
