@@ -1,14 +1,16 @@
 var request = require("supertest"),
-  app = require("../../../src/config/express");
+  path = require("path");
+var relativePath = path.relative("spec/unit/core", "src/config/express"),
+  app = require(relativePath);
 describe("Server", function() {
-  describe("should return appropraite server response.", function(done) {
-    it("Should response to /", function(done) {
+  describe("should return appropriate server response.", function() {
+    it("Should respond to /", function(done) {
       request(app)
         .get("/")
         .expect("Content-Type", /json/)
         .expect(200)
         .end(function(err, res) {
-          if (err) throw err; 
+          if (err) throw err;
           done();
         });
     });
