@@ -5,8 +5,4 @@ var app = express();
 
 var client = db();
 
-app.get("/",function(req,res){
-  res.json("Send me");
-});
-
 module.exports = app;

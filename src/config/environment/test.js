@@ -1,7 +1,7 @@
 module.exports = {
   db : {
-    user : "ubuntu",
-    password : "",
+    user : "postgres",
+    password : "a",
     database : "circle_test",
     host : "localhost",
     port : "5432"
