@@ -8,7 +8,24 @@ var Users = daofactory("Users", client, {
   "primaryKey ": "id",
   "table": "author"
 });
-console.log(Users.prototype);
+
+// Users.find({
+//   "where": {
+//         "lt" :{
+//           "id": "100"
+//         }
+//   },
+//   "orderby" : ["id"],
+//   "orderwith" : "asc",
+//   "cols" : ["name", "id"],
+//   "values" : {
+//     "field" : ["id", "name"],
+//     "value" : ["54","Ilias"]
+//   }
+// }, function(x) {
+//   console.log(x);
+// });
+
 describe("Data Access Object", function() {
   describe("Implements a factory pattern", function() {
     it("createDAO is a function", function() {
@@ -22,10 +39,12 @@ describe("Data Access Object", function() {
     });
   });
   describe("Contains basic data access methods", function() {
-    it("Contains find, findAll, delete methods", function() {
+    it("Contains find, findAll, delete, insert, update methods", function() {
       expect(Users.find).toBeDefined();
       expect(Users.findAll).toBeDefined();
-      expect(Users._delete).toBeDefined();
+      expect(Users.delete).toBeDefined();
+      expect(Users.insert).toBeDefined();
+      expect(Users.update).toBeDefined();
     });
   });
 });
