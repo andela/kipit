@@ -2,7 +2,7 @@ function createDAO(modelname, db, param) {
 
   // assign arguments to variables
   var modelname = modelname;
-  var pparams = param.primaryparams;
+  var pKey = param.primaryKey;
   var table = param.table;
   var db = db;
   db.connect();
@@ -45,8 +45,7 @@ function createDAO(modelname, db, param) {
    * @return {[string]}              [string of conditions in sql syntax]
    */
   function parseParams(params, oldKey, newKey, filterString) {
-    var inner = false,
-      oldKey = oldKey,
+      var oldKey = oldKey,
       cParams, filterString = filteString;
     for (var key in params) {
       if (filters.indexOf(key) > -1) {
@@ -84,7 +83,7 @@ function createDAO(modelname, db, param) {
       startValues = "",
       multiInsert = [],
       insertValue = [];
-    fields = (typeof params.field === 'object') ? params.field.join(", ") : params.field;
+    fields = (typeof params.field === "object") ? params.field.join(", ") : params.field;
     startValues = params.value;
 
     startValues.forEach(function(val) {
@@ -109,9 +108,8 @@ function createDAO(modelname, db, param) {
     var filter = (search.where) ? " where " + parseParams(search.where, [], "", []) : "";
     var cols = (search.cols) ? search.cols : "*";
     var order = (search.orderby && search.orderwith) ? " order by " + search.orderby.join(", ") + " " + search.orderwith : "";
-    console.log("select " + cols + " from " + table + filter + order);
     db.query("select " + cols + " from " + table + filter, function(err, data) {
-      if (err) return err;
+      if (err) { return err; }
       cb(data.rows);
     });
   }
@@ -173,11 +171,10 @@ function createDAO(modelname, db, param) {
   function _update(params, cb) {
     if (params.values && params.where) {
       var val = params.values.field.map(function(xfield, index) {
-        return xfield + "= '" + params.values.value[index] + "'"
+        return xfield + "= '" + params.values.value[index] + "'";
       });
       val = val.join(", ");
       var filter = (params.where) ? " where " + parseParams(params.where, [], "", []) : "";
-      console.log("update " + table + " set " + val + filter);
       db.query("update " + table + " set " + val + filter, function(err, data) {
         if (err) {
           return err;
@@ -196,7 +193,7 @@ function createDAO(modelname, db, param) {
     delete: _delete,
     insert: _insert,
     update: _update
-  }
-};
+  };
+}
 
 module.exports = createDAO;
