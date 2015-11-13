@@ -1,0 +1,30 @@
+{
+  "name": "kipit",
+  "version": "1.0.0",
+  "description": "Personal finance application.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo 'No tests yet.'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andela/kipit.git"
+  },
+  "keywords": [
+    "finance",
+    "budget",
+    "personal",
+    "react"
+  ],
+  "author": "Andela",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/andela/kipit/issues"
+  },
+  "homepage": "https://github.com/andela/kipit#readme",
+  "devDependencies": {
+    "express": "^4.13.3",
+    "pg": "^4.4.3"
+  }
+}
