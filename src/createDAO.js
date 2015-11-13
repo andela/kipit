@@ -5,11 +5,11 @@ function createDAO(modelname, db, param) {
   var pKey = param.primaryKey;
   var table = param.table;
   var db = db;
-  db.connect();
+  // db.connect();
 
   var filters = ["and", "or", "eq", "ne", "gt", "gte", "lt", "lte", "like", "nlike", "in", "nin", "cts"];
 
-  function createFilter(params, op) {
+  function createFilter(params, op,ops) {
     var operands = {
         "and": "=",
         "or": "=",
@@ -20,20 +20,19 @@ function createDAO(modelname, db, param) {
         "lt": "<",
         "lte": "<=",
         "like": "%"
-      },
-      filterStr = "";
+      }, filterStr = [];
     for (var x in params) {
       if (typeof params[x] === 'object') {
-        filterStr = params[x]
+        filterStr.push(params[x]
           .map(function(value) {
             return x + operands[op] + "'" + value.trim() + "'";
           })
-          .join(" or ");
+          .join(" or "));
       } else {
-        filterStr = x + operands[op] + "'" + params[x].trim() + "'";
+        filterStr.push(x + operands[op] + "'" + params[x].trim() + "'");
       }
     }
-    return filteStr;
+    return filterStr.join(" " + ops + " ");
   }
 
   /**
@@ -45,11 +44,11 @@ function createDAO(modelname, db, param) {
    * @return {[string]}              [string of conditions in sql syntax]
    */
   function parseParams(params, oldKey, newKey, filterString) {
-      var oldKey = oldKey,
-      cParams, filterString = filteString;
+    var cParams;
     for (var key in params) {
       if (filters.indexOf(key) > -1) {
         cParams = params[key];
+        oldKey = newKey;
         oldKey.push(newKey);
         newKey = key;
         parseParams(cParams, oldKey, newKey, filterString);
@@ -61,6 +60,21 @@ function createDAO(modelname, db, param) {
     return filterString.join(" " + oldKey[1] + " ");
   }
 
+   function test(params, oldKey, newKey, filterString) {
+    var cParams;
+    for (var key in params) {
+      if (filters.indexOf(key) > -1) {
+        cParams = params[key];
+        oldKey.push(newKey);
+        newKey = key;
+        test(cParams, oldKey, newKey, filterString);
+      } else {
+        filterString.push(createFilter(params, newKey, oldKey[oldKey.length -1]));
+        break;
+      }
+    }
+    return filterString.join(" " + oldKey[oldKey.length - 3 ] + " ");
+  }
   /**
    * appends single quotes to values for insert
    * @param  {[object]} values [array of values to be modified]
@@ -105,19 +119,22 @@ function createDAO(modelname, db, param) {
    * @return {[type]}          [matching rows in database]
    */
   function finds(search, cb) {
-    var filter = (search.where) ? " where " + parseParams(search.where, [], "", []) : "";
+    var filter = (search.where) ? " where " + test(search.where, [], "", []) : "";
     var cols = (search.cols) ? search.cols : "*";
-    var order = (search.orderby && search.orderwith) ? " order by " + search.orderby.join(", ") + " " + search.orderwith : "";
-    db.query("select " + cols + " from " + table + filter, function(err, data) {
-      if (err) { return err; }
-      cb(data.rows);
-    });
+    // var order = (search.orderby && search.orderwith) ? " order by " + search.orderby.join(", ") + " " + search.orderwith : "";
+    // db.query("select " + cols + " from " + table + filter + order, function(err, data) {
+    //   if (err) {
+    //     return err;
+    //   }
+    //   cb(data.rows);
+    // });
+    cb(filter);
   }
 
   // returns matching rows in database based on columns specified
   function _find(params, cb) {
     var search = params;
-    search.cols = (typeof search.cols === 'object') ? search.cols.join(", ") : search.cols;
+    search.cols = (typeof search.cols === "object") ? search.cols.join(", ") : search.cols;
     finds(search, cb);
   }
 
