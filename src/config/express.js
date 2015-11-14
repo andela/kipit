@@ -1,6 +1,7 @@
 // require modules
 var express = require("express");
 var db = require("./database");
+var daofactory = require("./../createDAO");
 var app = express();
 
 var client = db();
