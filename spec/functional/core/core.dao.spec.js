@@ -9,23 +9,6 @@ var Users = daofactory("Users", client, {
   "table": "author"
 });
 
-// Users.find({
-//   "where": {
-//         "lt" :{
-//           "id": "100"
-//         }
-//   },
-//   "orderby" : ["id"],
-//   "orderwith" : "asc",
-//   "cols" : ["name", "id"],
-//   "values" : {
-//     "field" : ["id", "name"],
-//     "value" : ["54","Ilias"]
-//   }
-// }, function(x) {
-//   console.log(x);
-// });
-
 describe("Data Access Object", function() {
   describe("Implements a factory pattern", function() {
     it("createDAO is a function", function() {
