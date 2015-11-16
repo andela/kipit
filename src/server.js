@@ -1,10 +1,6 @@
-var path = require('path');
-var express = require('express');
-
-var app = express();
-
-app.get('/', function(res, req){
-  res.send('')
-})
-app.listen(3000);
-});
+var app = require("./config/express");
+var serverPort = 3400;
+// listen on server
+var port = process.env.PORT || serverPort;
+var server = app.listen(port);
+console.log("Listening on port " + port);

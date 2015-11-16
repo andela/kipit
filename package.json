@@ -2,10 +2,10 @@
   "name": "kipit",
   "version": "1.0.0",
   "description": "Personal finance application.",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "echo 'No tests yet.'"
+    "start": "node server.js",
+    "test" : "NODE_ENV=test jasmine --spec"
   },
   "repository": {
     "type": "git",
@@ -23,8 +23,13 @@
     "url": "https://github.com/andela/kipit/issues"
   },
   "homepage": "https://github.com/andela/kipit#readme",
-  "devDependencies": {
+  "dependencies": {
     "express": "^4.13.3",
     "pg": "^4.4.3"
+  },
+  "devDependencies": {
+    "path": "~0.12.7",
+    "supertest": "~1.1.0",
+    "jasmine": "~2.3.2"
   }
 }
