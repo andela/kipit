@@ -1,11 +1,121 @@
+var _ = require("lodash");
+
 function createDAO(modelname, db, param) {
 
   // assign arguments to variables
   var modelname = modelname;
-  var pKey = param.primaryKey;
-  var table = param.table;
+  var tableName = param.table || modelname;
   var db = db;
 
+  // parses Table data and constraints
+  function parseTableSql(params) {
+    var tableConstraints = params.constraints;
+    var tableForeignKey = params.foreignKey;
+    var tabledata = [];
+    // check for foreign key tabledefinition
+    if (tableForeignKey) {
+      tabledata.push("FOREIGN KEY (" + tableForeignKey.cols.join(", ") + ") REFERENCES " + tableForeignKey.refs);
+    }
+    // check for constraints
+    if (tableConstraints) {
+      // checck for CHECK constraints
+      if (tableConstraints.check) {
+        var temp = tableConstraints.check.map(function(x) {
+          var name = (x.id) ? x.id : "";
+          var keyWord = (name !== "") ? "CONSTRAINT " + name : "";
+          return keyWord + " CHECK (" + x.colref + ")";
+        });
+        tabledata.push(temp.join(", "));
+      }
+      // check for UNIQUE constraints
+      if (tableConstraints.unique) {
+        var name = (tableConstraints.unique.id) ? tableConstraints.unique.id : "";
+        var keyWord = (name !== "") ? "CONSTRAINT " + name : "";
+        if (typeof tableConstraints.unique.colref === "object") {
+          tabledata.push(keyWord + " UNIQUE (" + tableConstraints.unique.colref.join(", ") + ")");
+        } else {
+          tabledata.push(keyWord + " UNIQUE (" + tableConstraints.unique.colref + ")");
+        }
+      }
+    }
+    return tabledata.join(", ");
+  }
+
+  // defines attribute to be checked in column definition
+  var columndata = ["type", "defaultval", "constraints", "references"];
+  /**
+   * Parses column definition in object
+   * @param  {string} colname column name
+   * @param  {object} columns object containing column attributes
+   * @return {string}         sql syntax column definition
+   */
+  function parseColumnSql(colname, columns) {
+    var colSyntax = [];
+
+    colSyntax.push(colname);
+
+    _.forEach(columndata, function(coldata) {
+      if (columns.hasOwnProperty(coldata)) {
+
+        // checks for column attributes
+        switch (coldata) {
+          case "type":
+            colSyntax.push(columns[coldata]);
+            break;
+          case "defaultval":
+            colSyntax.push("DEFAULT " + columns[coldata]);
+            break;
+          case "constraints":
+            if (columns.constraints.allowNull) {
+              colSyntax.push("NOT NULL");
+            }
+            if (columns.constraints.primaryKey) {
+              colSyntax.push("PRIMARY KEY");
+            }
+            if (columns.constraints.unique) {
+              var name = (columns.constraints.unique.id) ? columns.constraints.unique.id : "";
+              var keyWord = (name !== "") ? "CONSTRAINT " + name : "";
+              colSyntax.push(keyWord + " UNIQUE");
+            }
+            if (columns.constraints.check) {
+              var name = (columns.constraints.check.id) ? columns.constraints.check.id : "";
+              var keyWord = (name !== "") ? "CONSTRAINT " + name : "";
+              colSyntax.push(keyWord + " CHECK (" + columns.constraints.check.colref + ")");
+            }
+            break;
+          case "references":
+            colSyntax.push("REFERENCES " + columns[coldata]["refs"]);
+            break;
+          default:
+            break;
+        }
+      }
+    });
+    return colSyntax.join(" ");
+  }
+
+  /**
+   * Creates model/Table from supplied parameters in daofactory
+   * @param  {object} params object defining table schema
+   * @return {string}        Query results
+   */
+  function _createTable(params) {
+    var pKey = params.primaryKey;
+    var columns = params.columns,
+      createCol = [];
+    _.forOwn(columns, function(cols, key) {
+      createCol.push(parseColumnSql(key, cols));
+    });
+    createCol = createCol.join(", ");
+    var sqlCreateTable = "CREATE TABLE IF NOT EXISTS " + tableName + " ( " + createCol + ", " + parseTableSql(param) + " )";
+    console.log(sqlCreateTable);
+    executeQueryStmt(sqlCreateTable, function(data) {
+      console.log(data);
+    });
+  }
+
+
+  // operand for query
   var operands = {
     "and": "=",
     "or": "=",
@@ -18,62 +128,92 @@ function createDAO(modelname, db, param) {
     "like": "%"
   };
 
-
-
   /**
-   * appends single quotes to values for insert
-   * @param  {array} conditions array of values to be modified
-   * @param {string} op Condition for field:value pair
-   * @return {array}        array of modified values
+   * appends single quotes to values for insert;  or values for filters
+   * @param  {array} valueArr array of values to be modified
+   * @param  {string} field   key to be paired - Optional
+   * @param {string} op Condition for field:value pair - Optional
+   * @return {array}        array of strings of modified values
+   *
+   * Example 1: 
+   * when op is defined, call to appendSingleQuotes in "createFilter"
+   * 
+   * args0 = [value1, value2, value3], args1 = "name", args3 = "eq" 
+   * "eq" is replaced with "="  i.e. operands["eq"]
+   * result =  [name = 'value1',name = 'value2',name = 'value3']
+   * 
+   * args0 = [value1, value2, value3], args1 = "id", args3 = "lt" 
+   * "lt" is replaced with "<" i.e. operands["lt"]   
+   * result =  [id = 'value1', id = 'value2', id = 'value3']
+   *
+   * Example 2: 
+   * when op and field is null, call to appendSingleQuotes in "genSqlFieldValue"
+   * 
+   * args = [value1, value2, value3]
+   * result =  ['value1', 'value2', 'value3']
    */
-  function concatConditions(conditions, field, op) {
+  function appendSingleQuotes(valueArr, field, op) {
     var val;
-    if (op == "") {
-      val = conditions.map(function(cond) {
-        return "'" + cond.trim() + "'";
+    if (op === "" || field === "") { // call in genSqlFieldValue
+      val = valueArr.map(function(value) {
+        return "'" + value.trim() + "'";
       });
-    } else {
-      val = conditions.map(function(cond) {
-        return field + operands[op] + "'" + cond.trim() + "'";
+    } else { // call in createFilter
+      val = valueArr.map(function(value) {
+        return field + operands[op] + "'" + value.trim() + "'";
       });
     }
     return val;
   }
 
   /**
-   * concatValues generates sql syntax for inserting values
-   * @param  {object} params object containing insert field and values
-   * @return {array}        array of sql syntax for field and values
+   * genSqlFieldValue generates sql syntax for inserting values
+   * @param  {key-pair} params keypair containing insert field and values
+   * @return {array}        array of strings of sql syntax for field and values
+   *
+   * Example :
+   * single insert
+   * args : "values": { "field": ["id", "name"], "value": ["54", "Ilias"] }
+   * result =  [ "(id, name)", ('54', 'Ilias') ] 
+   *
+   * batch insertion
+   * args : "values": { "field": ["id", "name"], "value": [["54", "Ilias"], ["65", "Pollock"]] }
+   * result = [ "(id, name)", "('54', 'Ilias'), ('65', 'Pollock')" ]
+
+    })
    */
-  function concatValues(params) {
+  function genSqlFieldValue(params) {
     var fields = "",
       values,
       startValues = "",
       multiInsert = [],
       insertValue = [];
 
-    if (typeof params.field === "object") {
-      fields = params.field.join(", ")
+    // appends brackets to field
+    if (typeof params.field === "object") { //join array values and append bracket
+      fields = "(" + params.field.join(", ") + ")";
     } else {
-      fields = params.field;
+      fields = "(" + params.field + ")";
     }
-    startValues = params.value;
 
+    startValues = params.value; // assign insert values to variable
+
+    // append single quotes
     startValues.forEach(function(val) {
-      if (typeof val === 'object') {
-        multiInsert.push("(" + concatConditions(val).join(", ") + ")");
-      } else {
+      if (typeof val === 'object') { // append single quotes and brackets
+        multiInsert.push("(" + appendSingleQuotes(val).join(", ") + ")");
+      } else { // append single quotes
         insertValue.push("'" + val.trim() + "'");
       }
     });
 
+    // checks for multiple insertion
     if (insertValue.length > 0) {
       values = "(" + insertValue.join(", ") + ")"
     } else {
       values = multiInsert.join(", ");
     }
 
-    fields = "(" + fields + ")";
     return [fields, values];
   }
 
@@ -83,49 +223,67 @@ function createDAO(modelname, db, param) {
    * @param  {string} op     operand to use for conditions
    * @param  {string} ops    operand for multi conditions
    * @return {string}        sql condition syntax
+   *
+   * Example :
+   * args0 = { "id": ["2", "6"], "name": ["Isaac", "jackiy"] }, args1 = "and"
+   * result = 
+   * 
    */
-  function createFilter(params, op, ops) {
+  function createFilter(params, op) {
     var filterStr = [];
     for (var x in params) {
       if (typeof params[x] === "object") {
-        filterStr.push(concatConditions(params[x], x, op).join(" or "));
+        filterStr.push(appendSingleQuotes(params[x], x, op).join(" or "));
       } else {
         filterStr.push(x + operands[op] + "'" + params[x].trim() + "'");
       }
     }
-    return filterStr.join(" " + ops + " ");
+    return filterStr.join(" and ");
   }
 
   /**
    * parseParams concatenates conditions to sql syntax string for queries
-   * @param  {object} params       contains conditions to be concatentated
-   * @param  {array} oldKey       outer condition matcher
-   * @param  {string} newKey       direct condition matcher
-   * @param  {array} filterString array of conditions in sql syntax
-   * @return {string}              string of conditions in sql syntax
+   * @param  {object} params      contains conditions (search.where) to be concatentated
+   * @return {string}  filterString         string of conditions in sql syntax
+   *
+   * see core.dao.spec.js for example on params args for parseParams
    */
-  function parseParams(params, oldKey, nkey, filterString) {
-    var cParams;
-    for (var key in params) {
+  function parseParams(params) {
+    var filterString = [],
+      op,
+      temp = [];
+    // for each operands specified in where
+    _.forOwn(params, function(value, key) {
       if (operands.hasOwnProperty(key)) {
-        cParams = params[key];
-        oldKey = nkey;
-        nkey = key;
-        parseParams(cParams, oldKey, nkey, filterString);
-      } else {
-        filterString.push(createFilter(params, nkey, oldKey));
-        break;
+        // operands is not nested with another operand
+        if (value.length === undefined) {
+          filterString.push("(" + createFilter(value, key) + ")");
+        }
+        // Operand is nested in an array of operands
+        else {
+          // loop through operands in array
+          _.forEach(value,
+            function(n) {
+              _.forEach(n, function(_value, _key) {
+                temp.push(createFilter(_value, _key));
+              });
+            });
+          // join results with outer operands
+          filterString.push("(" + temp.join(" " + key + " ") + ")");
+        }
       }
-    }
-    return filterString.join(" " + oldKey + " ");
+    });
+    op = " " + (params["operator"]) + " " || " and ";
+    return filterString.join(op);
   }
+
 
   /**
    * creates a database connection and query
    * @param  {string} stmt sql query statement
    * @return {json data}      query results
    */
-  function db_access(stmt, cb) {
+  function executeQueryStmt(stmt, cb) {
     db.connect();
     db.query(stmt, function(err, data) {
       if (err) {
@@ -133,6 +291,7 @@ function createDAO(modelname, db, param) {
       }
       cb(data);
     });
+    db.end();
   }
 
   /**
@@ -142,17 +301,15 @@ function createDAO(modelname, db, param) {
    * @return {json data}          matching rows in database
    */
   function finds(search, cb) {
-    var filter = "",
-      cols = "*",
-      order = "";
-    if (search.where) filter = " where " + parseParams(search.where, "", "", []);
-    if (search.cols) cols = search.cols;
+    var order = "";
+    var filter = " where " + parseParams(search.where) || "";
+    var cols = search.cols || "*";
     if (search.orderby && search.orderwith) {
       order = " order by " + search.orderby.join(", ") + " " + search.orderwith;
     }
 
-    var stmt = "select " + cols + " from " + table + filter + order;
-    db_access(stmt, cb);
+    var stmt = "select " + cols + " from " + tableName + filter + order;
+    executeQueryStmt(stmt, cb);
   }
 
   // returns matching rows in database based on columns specified
@@ -177,10 +334,9 @@ function createDAO(modelname, db, param) {
    * @return {[number]}          [count of rows deleted]
    */
   function _delete(params, cb) {
-    var filter = "";
-    if (params.where) filter = " where " + parseParams(params.where, "", "", []);
-    var stmt = "delete from " + table + filter;
-    db_access(stmt, cb);
+    var filter = " where " + parseParams(params.where) || "";
+    var stmt = "delete from " + tableName + filter;
+    executeQueryStmt(stmt, cb);
   }
 
   /**
@@ -191,11 +347,13 @@ function createDAO(modelname, db, param) {
    */
   function _insert(params, cb) {
     if (params.values) {
-      var val = concatValues(params.values);
-      var stmt = "insert into " + table + " " + val[0] + " values " + val[1];
-      db_access(stmt, cb);
+      var val = genSqlFieldValue(params.values);
+      var stmt = "insert into " + tableName + " " + val[0] + " values " + val[1];
+      executeQueryStmt(stmt, cb);
     } else {
-      cb("Insert parameters incomplete");
+      cb(JSON.stringify({
+        "error": "Insert parameters incomplete"
+      }));
     }
   }
 
@@ -206,21 +364,26 @@ function createDAO(modelname, db, param) {
    * @return {[number]}          [count of rows updated]
    */
   function _update(params, cb) {
-    var filter = "",
-      val, stmt;
+    var val, stmt;
     if (params.values && params.where) {
+      // match field and value for update
       val = params.values.field.map(function(xfield, index) {
         return xfield + " = '" + params.values.value[index] + "'";
       });
       val = val.join(", ");
-      if (params.where) filter = " where " + parseParams(params.where, "", "", []);
+      var filter = " where " + parseParams(params.where) || "";
 
-      stmt = "update " + table + " set " + val + filter;
-      db_access(stmt, cb);
+      stmt = "update " + tableName + " set " + val + filter;
+      executeQueryStmt(stmt, cb);
     } else {
-      cb("Insert parameters incomplete");
+      cb(JSON.stringify({
+        "error": "Update parameters incomplete"
+      }));
     }
   }
+
+  // create table if not exists
+  _createTable(param);
 
   // return model methods
   return {
