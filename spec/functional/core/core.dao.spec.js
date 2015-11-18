@@ -4,23 +4,24 @@ var daofactory = require(path.relative("spec/fucntional/core", "src/createDAO"))
 var db = require(path.relative("spec/fucntional/core", "src/config/database"));
 
 var client = db();
-var Users = daofactory("Users", client, sampleModel);
 
 var sampleModel = {
   "table": "TestUsers",
   "primaryKey": "username",
+  "forcecreate" : true, // use true when table should be dropped and recreated
   "constraints": {
     "check": [{
       "id": "username_not_empty",
       "colref": "username !=  '' "
-    }],
+    }], // must be an array of object(s)
     "unique": {
       "id": "unique_users",
       "colref": "username"
     }
+    ,
     // "foreignKey": {
-    //   "cols": "username",
-    //   "refs": "tablename (cols)"
+    //   "cols": "username", // can be an array of column names or just a column name
+    //   "refs": "tablename [(cols)]" // table must have a primary key if cols is omitted
     // }
   },
   "columns": {
@@ -41,7 +42,7 @@ var sampleModel = {
       // }
       // },
       // "references": {
-      //   "refs": " Accounts"
+      //   "refs": " Accounts [(cols)]" // table must have a primary key if cols is omitted
       // }
     },
     "password": {
@@ -91,6 +92,10 @@ var sampleQueryDefinition = {
       "id": "7",
       "price": "90"
     },
+    "ne": {
+      "id": "7",
+      "price": "90"
+    },
     // operator for complex queries 
     // e.g ("and statement") operator ("lt statement")
     "operator": "or"
@@ -114,9 +119,9 @@ var sampleQueryDefinition = {
   }
 };
 
-// Users.find(sampleQueryDefinition, function(x) {
-//   console.log(x);
-// });
+var Users = daofactory("Users", client, sampleModel);
+
+Users.find(sampleQueryDefinition, console.log);
 
 describe("Data Access Object", function() {
   describe("Implements a factory pattern", function() {

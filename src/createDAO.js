@@ -1,4 +1,5 @@
 var _ = require("lodash");
+var async = require("async");
 
 function createDAO(modelname, db, param) {
 
@@ -14,7 +15,8 @@ function createDAO(modelname, db, param) {
     var tabledata = [];
     // check for foreign key tabledefinition
     if (tableForeignKey) {
-      tabledata.push("FOREIGN KEY (" + tableForeignKey.cols.join(", ") + ") REFERENCES " + tableForeignKey.refs);
+      var arr = (tableForeignKey.cols === "object")? tableForeignKey.cols.join(", ") : tableForeignKey.cols;
+      tabledata.push("FOREIGN KEY (" + arr + ") REFERENCES " + tableForeignKey.refs);
     }
     // check for constraints
     if (tableConstraints) {
@@ -100,20 +102,40 @@ function createDAO(modelname, db, param) {
    * @return {string}        Query results
    */
   function _createTable(params) {
-    var pKey = params.primaryKey;
+    var pKey = params.primaryKey,
+      dropCreate = "",
+      checkCreate = "";
+
+    if (params.forcecreate) {
+      dropCreate = "DROP TABLE IF EXISTS ";
+    } else {
+      checkCreate = "IF NOT EXISTS ";
+    }
+
     var columns = params.columns,
       createCol = [];
     _.forOwn(columns, function(cols, key) {
       createCol.push(parseColumnSql(key, cols));
     });
     createCol = createCol.join(", ");
-    var sqlCreateTable = "CREATE TABLE IF NOT EXISTS " + tableName + " ( " + createCol + ", " + parseTableSql(param) + " )";
-    console.log(sqlCreateTable);
-    executeQueryStmt(sqlCreateTable, function(data) {
-      console.log(data);
-    });
-  }
 
+    var sqlCreateTable = "CREATE TABLE " + checkCreate + tableName + " ( " + createCol + ", " + parseTableSql(param) + " )";
+    var sqlDropTable = dropCreate + tableName;
+
+    if (dropCreate !== "") {
+      executeQueryStmt(sqlDropTable, function(data) {
+          if (data.command) {
+              console.log(tableName, " Dropped");
+              executeQueryStmt(sqlCreateTable, console.log);
+            } else {
+              console.log("Error occured with DROP ", tableName);
+              return data;
+            }
+      });
+    } else {
+      executeQueryStmt(sqlCreateTable, console.log);
+    }
+  }
 
   // operand for query
   var operands = {
@@ -284,14 +306,26 @@ function createDAO(modelname, db, param) {
    * @return {json data}      query results
    */
   function executeQueryStmt(stmt, cb) {
-    db.connect();
+    // check if databse connection is open
+    if (!db.connection.stream.readable) {
+      db.connect(function(err, db) {
+        if (err) {
+          cb("Could not connect to postgres \n" + err);
+        } else {
+          console.log("Connection established");
+        }
+      });
+    }
+    // execute Query
     db.query(stmt, function(err, data) {
       if (err) {
         cb(err);
+        db.end();
+      } else {
+        cb(data);
+        db.end();
       }
-      cb(data);
     });
-    db.end();
   }
 
   /**
@@ -388,8 +422,8 @@ function createDAO(modelname, db, param) {
   // return model methods
   return {
     find: _find,
-    findAll: _findAll,
     delete: _delete,
+    findAll: _findAll,
     insert: _insert,
     update: _update
   };
