@@ -1,6 +1,6 @@
 var request = require("supertest"),
   path = require("path");
-var relativePath = path.relative("spec/unit/core", "src/config/express"),
+var relativePath = path.relative("spec/unit/core", "app/config/express"),
   app = require(relativePath);
 describe("Server", function() {
   describe("should return appropriate server response.", function() {
