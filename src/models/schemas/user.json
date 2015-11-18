@@ -1,0 +1,40 @@
+{
+  "tableName": "Users",
+  "primaryKey": "userId",
+
+  "columns": {
+    
+    "userName": {
+      "type": "text",
+      "constraints": {
+        "allowNull": false,
+        "unique": true
+      }
+    },
+
+    "email": {
+      "type": "text",
+      "constraints": {
+        "allowNull": false,
+        "unique":true
+      }
+    },
+
+    "password": {
+      "type": "text",
+      "constraints": {
+        "allowNull": false,
+        "unique": true
+      }
+    },
+
+    "userId": {
+      "type": "serial",
+      "constraints": {
+        "allowNull": false,
+        "unique":true,
+        "primaryKey": true
+      }  
+    }
+  }
+}

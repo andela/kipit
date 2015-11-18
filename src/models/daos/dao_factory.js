@@ -1,6 +1,6 @@
 var _ = require("lodash");
 
-function createDAO(modelname, db, param) {
+function createDAO(modelname, db, param, sendModel) {
 
   // assign arguments to variables
   var modelname = modelname;
@@ -14,7 +14,7 @@ function createDAO(modelname, db, param) {
     var tabledata = [];
     // check for foreign key tabledefinition
     if (tableForeignKey) {
-      var arr = (tableForeignKey.cols === "object")? tableForeignKey.cols.join(", ") : tableForeignKey.cols;
+      var arr = (tableForeignKey.cols === "object") ? tableForeignKey.cols.join(", ") : tableForeignKey.cols;
       tabledata.push("FOREIGN KEY (" + arr + ") REFERENCES " + tableForeignKey.refs);
     }
     // check for constraints
@@ -39,7 +39,8 @@ function createDAO(modelname, db, param) {
         }
       }
     }
-    return tabledata.join(", ");
+    var tableData = (tabledata.length > 0)? ", " + tabledata.join(", ") :  "";
+    return tableData;
   }
 
   // defines attribute to be checked in column definition
@@ -67,7 +68,7 @@ function createDAO(modelname, db, param) {
             colSyntax.push("DEFAULT " + columns[coldata]);
             break;
           case "constraints":
-            if (columns.constraints.allowNull) {
+            if (!columns.constraints.allowNull) {
               colSyntax.push("NOT NULL");
             }
             if (columns.constraints.primaryKey) {
@@ -75,8 +76,8 @@ function createDAO(modelname, db, param) {
             }
             if (columns.constraints.unique) {
               var name = (columns.constraints.unique.id) ? columns.constraints.unique.id : "";
-              var keyWord = (name !== "") ? "CONSTRAINT " + name : "";
-              colSyntax.push(keyWord + " UNIQUE");
+              var keyWord = (name !== "") ? "CONSTRAINT " + name  + " " : "";
+              colSyntax.push(keyWord + "UNIQUE");
             }
             if (columns.constraints.check) {
               var name = (columns.constraints.check.id) ? columns.constraints.check.id : "";
@@ -100,7 +101,7 @@ function createDAO(modelname, db, param) {
    * @param  {object} params object defining table schema
    * @return {string}        Query results
    */
-  function _createTable(params) {
+  function _createTable(params, callback) {
     var pKey = params.primaryKey,
       dropCreate = "",
       checkCreate = "";
@@ -118,22 +119,50 @@ function createDAO(modelname, db, param) {
     });
     createCol = createCol.join(", ");
 
-    var sqlCreateTable = "CREATE TABLE " + checkCreate + tableName + " ( " + createCol + ", " + parseTableSql(param) + " )";
+    var sqlCreateTable = "CREATE TABLE " + checkCreate + tableName + " ( " + createCol  + parseTableSql(param) + " )";
+
     var sqlDropTable = dropCreate + tableName;
 
     if (dropCreate !== "") {
       executeQueryStmt(sqlDropTable, function(data) {
-          if (data.command) {
-              console.log(tableName, " Dropped");
-              executeQueryStmt(sqlCreateTable, console.log);
-            } else {
-              console.log("Error occured with DROP ", tableName);
-              return data;
-            }
+        console.log(data);
+        if (data.command) {
+          console.log(tableName, " Dropped");
+          executeQueryStmt(sqlCreateTable, callback);
+        } else {
+          console.log("Error occured with DROP ", tableName, data);
+           sendModel(data);
+        }
       });
     } else {
-      executeQueryStmt(sqlCreateTable, console.log);
+      executeQueryStmt(sqlCreateTable, callback);
     }
+  }
+
+  /**
+   * creates a database connection and query
+   * @param  {string} stmt sql query statement
+   * @return {json data}      query results
+   */
+  function executeQueryStmt(stmt, cb) {
+    // check if databse connection is open
+    if (!db.connection.stream.readable && !db.connection.stream.writable) {
+      db.connect(function(err, db) {
+        if (err) {
+          cb("Could not connect to postgres \n" + err);
+        } else {
+          console.log("Connection established");
+        }
+      });
+    }
+    // execute Query
+    db.query(stmt, function(err, data) {
+      if (err) {
+        cb(err);
+      } else {
+        cb(data);
+      }
+    });
   }
 
   // operand for query
@@ -175,7 +204,7 @@ function createDAO(modelname, db, param) {
    */
   function appendSingleQuotes(valueArr, field, op) {
     var val;
-    if (op === "" || field === "") { // call in genSqlFieldValue
+    if (op === undefined || field === undefined) { // call in genSqlFieldValue
       val = valueArr.map(function(value) {
         return "'" + value.trim() + "'";
       });
@@ -299,33 +328,6 @@ function createDAO(modelname, db, param) {
   }
 
 
-  /**
-   * creates a database connection and query
-   * @param  {string} stmt sql query statement
-   * @return {json data}      query results
-   */
-  function executeQueryStmt(stmt, cb) {
-    // check if databse connection is open
-    if (!db.connection.stream.readable) {
-      db.connect(function(err, db) {
-        if (err) {
-          cb("Could not connect to postgres \n" + err);
-        } else {
-          console.log("Connection established");
-        }
-      });
-    }
-    // execute Query
-    db.query(stmt, function(err, data) {
-      if (err) {
-        cb(err);
-        db.end();
-      } else {
-        cb(data);
-        db.end();
-      }
-    });
-  }
 
   /**
    * Generic find method for database query
@@ -416,16 +418,19 @@ function createDAO(modelname, db, param) {
   }
 
   // create table if not exists
-  _createTable(param);
+  _createTable(param, function(result) {
+    console.log(result);
+    
+    // return model methods
+    sendModel( {
+      find: _find,
+      delete: _delete,
+      findAll: _findAll,
+      insert: _insert,
+      update: _update
+    });
+  });
 
-  // return model methods
-  return {
-    find: _find,
-    delete: _delete,
-    findAll: _findAll,
-    insert: _insert,
-    update: _update
-  };
 }
 
 module.exports = createDAO;
