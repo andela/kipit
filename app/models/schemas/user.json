@@ -1,0 +1,13 @@
+{
+  "tableName": "user",
+  "primaryKey": "id",
+  "id": {
+    "type": "int",
+  },
+  "firstName":{
+    "type": "varchar(20)",
+          : "NOT NULL"
+  },
+  "lastName":"varchar(20) NOT NULL",
+  
+}
