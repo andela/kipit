@@ -1,5 +1,5 @@
 var path = require("path");
-var relativePath = path.relative("spec/unit/database", "src/config/config");
+var relativePath = path.relative("spec/unit/database", "app/config/config");
 var dbConfig = require(relativePath);
 var databaseName;
 describe("Database", function() {
