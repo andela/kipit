@@ -1,6 +1,6 @@
 var _ = require("lodash");
 
-function createDAO(modelname, db, param, sendModel) {
+function createDAO(modelname, db, param) {
 
   // assign arguments to variables
   var modelname = modelname;
@@ -39,7 +39,7 @@ function createDAO(modelname, db, param, sendModel) {
         }
       }
     }
-    var tableData = (tabledata.length > 0)? ", " + tabledata.join(", ") :  "";
+    var tableData = (tabledata.length > 0) ? ", " + tabledata.join(", ") : "";
     return tableData;
   }
 
@@ -76,7 +76,7 @@ function createDAO(modelname, db, param, sendModel) {
             }
             if (columns.constraints.unique) {
               var name = (columns.constraints.unique.id) ? columns.constraints.unique.id : "";
-              var keyWord = (name !== "") ? "CONSTRAINT " + name  + " " : "";
+              var keyWord = (name !== "") ? "CONSTRAINT " + name + " " : "";
               colSyntax.push(keyWord + "UNIQUE");
             }
             if (columns.constraints.check) {
@@ -119,7 +119,7 @@ function createDAO(modelname, db, param, sendModel) {
     });
     createCol = createCol.join(", ");
 
-    var sqlCreateTable = "CREATE TABLE " + checkCreate + tableName + " ( " + createCol  + parseTableSql(param) + " )";
+    var sqlCreateTable = "CREATE TABLE " + checkCreate + tableName + " ( " + createCol + parseTableSql(param) + " )";
 
     var sqlDropTable = dropCreate + tableName;
 
@@ -128,13 +128,14 @@ function createDAO(modelname, db, param, sendModel) {
         console.log(data);
         if (data.command) {
           console.log(tableName, " Dropped");
+          console.log(sqlCreateTable);
           executeQueryStmt(sqlCreateTable, callback);
         } else {
           console.log("Error occured with DROP ", tableName, data);
-           sendModel(data);
         }
       });
     } else {
+      console.log(sqlCreateTable);
       executeQueryStmt(sqlCreateTable, callback);
     }
   }
@@ -418,19 +419,23 @@ function createDAO(modelname, db, param, sendModel) {
   }
 
   // create table if not exists
-  _createTable(param, function(result) {
-    console.log(result);
-    
-    // return model methods
-    sendModel( {
-      find: _find,
-      delete: _delete,
-      findAll: _findAll,
-      insert: _insert,
-      update: _update
+  function _syncdb() {
+    return new Promise(function(resolve, reject) {
+      _createTable(param, function(result) {
+        resolve(result);
+      });
     });
-  });
+  }
 
+  // return model methods
+  return {
+    syncdb: _syncdb,
+    find: _find,
+    delete: _delete,
+    findAll: _findAll,
+    insert: _insert,
+    update: _update
+  };
 }
 
 module.exports = createDAO;

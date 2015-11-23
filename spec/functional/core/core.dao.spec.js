@@ -2,121 +2,48 @@
 var path = require("path");
 var daofactory = require(path.relative("spec/fucntional/core", "src/models/daos/dao_factory"));
 var db = require(path.relative("spec/fucntional/core", "src/config/database"));
+var usermodel = require(path.relative("spec/fucntional/core", "src/models/schemas/user.json"));
 
 var client = db();
-
-
-var sampleModel = {
-  "table": "TestUsers",
-  "primaryKey": "username",
-  "forcecreate": true, // use true when table should be dropped and recreated
-  "constraints": {
-    "check": [{
-      "id": "username_not_empty",
-      "colref": "username !=  '' "
-    }], // must be an array of object(s)
-    "unique": {
-      "id": "unique_users",
-      "colref": "username"
-    },
-    // "foreignKey": {
-    //   "cols": "username", // can be an array of column names or just a column name
-    //   "refs": "tablename [(cols)]" // table must have a primary key if cols is omitted
-    // }
-  },
-  "columns": {
-    "username": {
-      "type": "varchar(20)",
-      // "defaultval": "",
-      "constraints": {
-        "allowNull": false,
-        "unique": {
-          "id": "unique_userme"
-        },
-        "primaryKey": true
-      }
-      // },
-      // "check": {
-      //   "id": "username",
-      //   "colref": "username !== '' "
-      // }
-      // },
-      // "references": {
-      //   "refs": " Accounts [(cols)]" // table must have a primary key if cols is omitted
-      // }
-    },
-    "password": {
-      "type": "varchar(20)",
-      // "defaultval": "",
-      "constraints": {
-        "allowNull": false,
-        "unique": {
-          "id": "password"
-        }
-      }
-      // },
-      // "check": {
-      //   "id": "password",
-      //   "colref": "password !== '' "
-      // }
-      // },
-      // "references": {
-      //   "refs": " Accounts"
-      // }
-    }
-  }
-};
 
 var sampleQueryDefinition = {
   // filter values and operators for where statement
   "where": {
-    // nested operand - contains array of operands
     "or": [
-        // innner operand 1 of "and"
-        {
-          "eq": {
-            "username": ["Aragon", "Mary"],
-            "password": ["Shelley", "Gondor"]
-          }
-        },
-        // inner operand 2 of "and"
-        {
-          "eq": {
-            "username": "Legolas"
-          }
+      // innner operand 1 of "and"
+      {
+        "eq": {
+          "userName": ["Aragon", "Mary"],
+          "password": ["Shelley", "Gondor"]
         }
-      ]
-      // // non nested operand
-      // "lt": {
-      //   "id": "7",
-      //   "price": "90"
-      // },
-      // "ne": {
-      //   "id": "7",
-      //   "price": "90"
-      // },
-      // // operator for complex queries 
-      // // e.g ("and statement") operator ("lt statement")
-      // "operator": "or"
-      //   //////// ends of filter vaues
+      },
+      // inner operand 2 of "and"
+      {
+        "eq": {
+          "userName": "Legolas"
+        }
+      }
+    ]
+
   },
   // order of columns
-  "orderby": ["username"],
+  "orderby": ["userName"],
   // order pattern
   "orderwith": "desc",
   // columns in databse to be reported
-  "cols": ["username", "password"],
+  "cols": ["userName", "password"],
   // values to be inserted or updated
   "values": {
     // columns for update or insert
-    "field": ["username", "password"],
+    "field": ["userName", "password", "email"],
     // value for update or insert
     "value": [
-      ["Aragon", "Gondor"],
-      ["Legolas", "Elf"]
+      ["Aragon", "Gondor", "aragon@ltr.com"],
+      ["Legolas", "Elf", "legolas@ltr.com"]
     ]
   }
 };
+
 
 var Users;
 
@@ -125,17 +52,14 @@ describe("Data Access Object", function() {
   describe("Implements a factory pattern", function() {
 
     beforeEach(function(done) {
-      daofactory("Users", client, sampleModel, function(model) {
-        Users = model;
-        done();
-      });
+      Users = daofactory("Users", client, usermodel);
+      done();
     });
 
     afterEach(function(done) {
       Users = undefined;
       done();
     });
-
 
     it("createDAO is a function", function(done) {
       expect(daofactory).toEqual(jasmine.any(Function));
@@ -155,10 +79,8 @@ describe("Data Access Object", function() {
   describe("Contains basic data access methods", function() {
 
     beforeEach(function(done) {
-      daofactory("Users", client, sampleModel, function(model) {
-        Users = model;
-        done();
-      });
+      Users = daofactory("Users", client, usermodel);
+      done();
     });
 
     afterEach(function(done) {
@@ -172,16 +94,25 @@ describe("Data Access Object", function() {
       expect(Users.delete).toBeDefined();
       expect(Users.insert).toBeDefined();
       expect(Users.update).toBeDefined();
-
-      //sample queries
-      Users.insert(sampleQueryDefinition, console.log);
-
-      Users.find(sampleQueryDefinition, console.log);
-
       done();
     });
 
-  });
+    //sample queries
+    it("should sync model, and execute queries", function(done) {
+      Users.syncdb().then(function(status) {
+        console.log(status);
+        if (status.command === "CREATE") {
+          Users.insert(sampleQueryDefinition, function(inserted) {
+            expect(inserted.rowCount).toEqual(2);
+            done();
+          });
+        } else {
+          console.log("Error Syncing model");
+          done();
+        }
+      });
+    });
 
+  });
 
 });

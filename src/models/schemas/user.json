@@ -1,7 +1,7 @@
 {
   "tableName": "Users",
   "primaryKey": "userId",
-
+  "forcecreate" : true,
   "columns": {
     
     "userName": {
