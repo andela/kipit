@@ -47,10 +47,15 @@
   var Users = daofactory("Users", client, usermodel);
 
   Users.syncdb().then(function(status) {
-    console.log(status);
-    if (status.command === "CREATE") {
-      Users.insert(sampleQueryDefinition, console.log);
-    } else {
-      console.log("Error Syncing model");
-    }
+    console.log("Models synced successfully");
+    Users.insert(sampleQueryDefinition, function(err, data) {
+      if (err) {
+        console.log(err);
+        return;
+      } else {
+        console.log(data);
+      }
+    });
+  }).catch(function(err) {
+    console.log("Error Syncing model", err);
   });

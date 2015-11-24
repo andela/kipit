@@ -100,16 +100,19 @@ describe("Data Access Object", function() {
     //sample queries
     it("should sync model, and execute queries", function(done) {
       Users.syncdb().then(function(status) {
-        console.log(status);
-        if (status.command === "CREATE") {
-          Users.insert(sampleQueryDefinition, function(inserted) {
-            expect(inserted.rowCount).toEqual(2);
+        console.log("Models synced successfully");
+        Users.insert(sampleQueryDefinition, function(err, data) {
+          if (err) {
+            console.log(err);
             done();
-          });
-        } else {
-          console.log("Error Syncing model");
-          done();
-        }
+          } else {
+           expect(data.rowCount).toEqual(2);
+            done();
+          }
+        });
+      }).catch(function(err) {
+        console.log("Error Syncing model", err);
+        done();
       });
     });
 

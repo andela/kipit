@@ -124,18 +124,16 @@ function createDAO(modelname, db, param) {
     var sqlDropTable = dropCreate + tableName;
 
     if (dropCreate !== "") {
-      executeQueryStmt(sqlDropTable, function(data) {
-        console.log(data);
-        if (data.command) {
-          console.log(tableName, " Dropped");
-          console.log(sqlCreateTable);
-          executeQueryStmt(sqlCreateTable, callback);
+      executeQueryStmt(sqlDropTable, function(err, data) {
+        if (err) {
+          console.log("Error occured with DROP ", tableName, err);
+          return;
         } else {
-          console.log("Error occured with DROP ", tableName, data);
+          console.log(tableName, " Dropped");
+          executeQueryStmt(sqlCreateTable, callback);
         }
       });
     } else {
-      console.log(sqlCreateTable);
       executeQueryStmt(sqlCreateTable, callback);
     }
   }
@@ -159,9 +157,9 @@ function createDAO(modelname, db, param) {
     // execute Query
     db.query(stmt, function(err, data) {
       if (err) {
-        cb(err);
+        cb(err, null);
       } else {
-        cb(data);
+        cb(null, data);
       }
     });
   }
@@ -260,7 +258,7 @@ function createDAO(modelname, db, param) {
 
     // checks for multiple insertion
     if (insertValue.length > 0) {
-      values = "(" + insertValue.join(", ") + ")"
+      values = "(" + insertValue.join(", ") + ")";
     } else {
       values = multiInsert.join(", ");
     }
@@ -421,8 +419,12 @@ function createDAO(modelname, db, param) {
   // create table if not exists
   function _syncdb() {
     return new Promise(function(resolve, reject) {
-      _createTable(param, function(result) {
-        resolve(result);
+      _createTable(param, function(err, result) {
+        if (err) {
+          reject(Error(err));
+        } else {
+          resolve(result);
+        }
       });
     });
   }
