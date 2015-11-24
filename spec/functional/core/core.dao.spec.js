@@ -1,8 +1,8 @@
 // Define test for DAO factory
 var path = require("path");
-var daofactory = require(path.relative("spec/fucntional/core", "src/models/daos/dao_factory"));
-var db = require(path.relative("spec/fucntional/core", "src/config/database"));
-var usermodel = require(path.relative("spec/fucntional/core", "src/models/schemas/user.json"));
+var daofactory = require(path.relative("spec/fucntional/core", "app/models/daos/dao_factory"));
+var db = require(path.relative("spec/fucntional/core", "app/config/database"));
+var usermodel = require(path.relative("spec/fucntional/core", "app/models/schemas/user.json"));
 
 var client = db();
 

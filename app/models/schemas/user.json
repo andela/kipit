@@ -1,13 +1,40 @@
 {
-  "tableName": "user",
-  "primaryKey": "id",
-  "id": {
-    "type": "int",
-  },
-  "firstName":{
-    "type": "varchar(20)",
-          : "NOT NULL"
-  },
-  "lastName":"varchar(20) NOT NULL",
-  
+  "tableName": "Users",
+  "primaryKey": "userId",
+  "forcecreate" : true,
+  "columns": {
+    
+    "userName": {
+      "type": "text",
+      "constraints": {
+        "allowNull": false,
+        "unique": true
+      }
+    },
+
+    "email": {
+      "type": "text",
+      "constraints": {
+        "allowNull": false,
+        "unique":true
+      }
+    },
+
+    "password": {
+      "type": "text",
+      "constraints": {
+        "allowNull": false,
+        "unique": true
+      }
+    },
+
+    "userId": {
+      "type": "serial",
+      "constraints": {
+        "allowNull": false,
+        "unique":true,
+        "primaryKey": true
+      }  
+    }
+  }
 }
