@@ -10,7 +10,7 @@ describe("Server", function() {
         .expect("Content-Type", /json/)
         .expect(200)
         .end(function(err, res) {
-          if (err) throw err;
+          if (err) return err;
           done();
         });
     });
