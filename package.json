@@ -2,9 +2,8 @@
   "name": "kipit",
   "version": "1.0.0",
   "description": "Personal finance application.",
-  "main": "index.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "nodemon server.js",
     "test": "NODE_ENV=test jasmine --spec"
   },
   "repository": {
@@ -26,7 +25,10 @@
   "dependencies": {
     "express": "^4.13.3",
     "lodash": "^3.10.1",
-    "pg": "^4.4.3"
+    "pg": "^4.4.3",
+    "body-parser": "~1.13.2",
+    "cookie-parser": "~1.3.5",
+    "morgan": "~1.6.1"
   },
   "devDependencies": {
     "path": "~0.12.7",
