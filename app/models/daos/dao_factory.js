@@ -184,20 +184,20 @@ function createDAO(modelname, db, param) {
    * @param {string} op Condition for field:value pair - Optional
    * @return {array}        array of strings of modified values
    *
-   * Example 1: 
+   * Example 1:
    * when op is defined, call to appendSingleQuotes in "createFilter"
-   * 
-   * args0 = [value1, value2, value3], args1 = "name", args3 = "eq" 
+   *
+   * args0 = [value1, value2, value3], args1 = "name", args3 = "eq"
    * "eq" is replaced with "="  i.e. operands["eq"]
    * result =  [name = 'value1',name = 'value2',name = 'value3']
-   * 
-   * args0 = [value1, value2, value3], args1 = "id", args3 = "lt" 
-   * "lt" is replaced with "<" i.e. operands["lt"]   
+   *
+   * args0 = [value1, value2, value3], args1 = "id", args3 = "lt"
+   * "lt" is replaced with "<" i.e. operands["lt"]
    * result =  [id = 'value1', id = 'value2', id = 'value3']
    *
-   * Example 2: 
+   * Example 2:
    * when op and field is null, call to appendSingleQuotes in "genSqlFieldValue"
-   * 
+   *
    * args = [value1, value2, value3]
    * result =  ['value1', 'value2', 'value3']
    */
@@ -223,7 +223,7 @@ function createDAO(modelname, db, param) {
    * Example :
    * single insert
    * args : "values": { "field": ["id", "name"], "value": ["54", "Ilias"] }
-   * result =  [ "(id, name)", ('54', 'Ilias') ] 
+   * result =  [ "(id, name)", ('54', 'Ilias') ]
    *
    * batch insertion
    * args : "values": { "field": ["id", "name"], "value": [["54", "Ilias"], ["65", "Pollock"]] }
@@ -275,8 +275,8 @@ function createDAO(modelname, db, param) {
    *
    * Example :
    * args0 = { "id": ["2", "6"], "name": ["Isaac", "jackiy"] }, args1 = "and"
-   * result = 
-   * 
+   * result =
+   *
    */
   function createFilter(params, op) {
     var filterStr = [];
@@ -335,14 +335,19 @@ function createDAO(modelname, db, param) {
    * @return {json data}          matching rows in database
    */
   function finds(search, cb) {
-    var order = "";
-    var filter = " where " + parseParams(search.where) || "";
+    var order = "", filter = "";
+    if (search.where === undefined || !(_.keys(search.where).length)) {
+      filter = "";
+    } else {
+      filter = " where " + parseParams(search.where);
+    }
     var cols = search.cols || "*";
     if (search.orderby && search.orderwith) {
       order = " order by " + search.orderby.join(", ") + " " + search.orderwith;
     }
 
     var stmt = "select " + cols + " from " + tableName + filter + order;
+    console.log(stmt);
     executeQueryStmt(stmt, cb);
   }
 
@@ -356,7 +361,7 @@ function createDAO(modelname, db, param) {
 
   // returns matching rows in database and all columns
   function _findAll(params, cb) {
-    var search = params;
+    var search = (params) ? params : {};
     search.cols = undefined;
     finds(search, cb);
   }

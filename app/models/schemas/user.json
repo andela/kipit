@@ -1,9 +1,7 @@
 {
   "tableName": "Users",
   "primaryKey": "userId",
-  "forcecreate" : true,
   "columns": {
-    
     "userName": {
       "type": "text",
       "constraints": {
@@ -16,15 +14,14 @@
       "type": "text",
       "constraints": {
         "allowNull": false,
-        "unique":true
+        "unique": true
       }
     },
 
     "password": {
       "type": "text",
       "constraints": {
-        "allowNull": false,
-        "unique": true
+        "allowNull": false
       }
     },
 
@@ -32,9 +29,9 @@
       "type": "serial",
       "constraints": {
         "allowNull": false,
-        "unique":true,
+        "unique": true,
         "primaryKey": true
-      }  
+      }
     }
   }
 }
