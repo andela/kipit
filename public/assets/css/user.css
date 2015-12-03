@@ -1,0 +1,178 @@
+.navbar {
+  margin-bottom:0;
+  border:none;
+  background-color:#388E3C;
+  box-shadow:0px 2px 20px 0.1px;
+}
+
+.navbar-brand .glyphicon {
+  margin-right:6px;
+}
+
+@media (min-width:992px) {
+  .hero .get-it{
+    text-align:center;
+    vertical-align:middle;
+  }
+}
+
+@media (max-width:992px) {
+  .hero .get-it{
+    vertical-align:middle;
+  }
+}
+
+.hero .get-it h1, .hero .get-it p{
+  color:#fff;
+  text-shadow:2px 2px 3px rgba(0,0,0,0.3);
+  margin-bottom:40px;
+}
+
+.hero .get-it .btn{
+  margin-left:10px;
+  margin-bottom:10px;
+  text-shadow:none;
+}
+
+.icon-feature{
+  text-align:center;
+
+}
+
+.icon-feature .glyphicon{
+  font-size:60px;
+}
+
+section.features{
+  background-color:transparent;
+  color:#fff;
+}
+
+.site-footer{
+  padding:0px;
+  text-align:center;
+  background-color:#4CAF50;
+  opacity:0.7;
+  transition:ease .5s all;
+  color:#fff;
+}
+
+@media (min-width:768px) {
+  .site-footer h5{
+    text-align:left;
+  }
+}
+
+.site-footer h5{
+  color:inherit;
+  font-size:20px;
+}
+
+.site-footer .social-icons a:hover{
+  opacity:1;
+}
+
+.site-footer .social-icons a{
+  display:inline-block;
+  width:32px;
+  border:none;
+  font-size:20px;
+  border-radius:50%;
+  margin:4px;
+  color:#4CAF50;
+  text-align:center;
+  background-color:#fff;
+  height:32px;
+  opacity:0.8;
+  line-height:32px;
+}
+
+@media (min-width:768px) {
+  .site-footer .social-icons{
+    text-align:right;
+  }
+}
+
+div.get-it{
+  background:rgba(0,0,0,0.8);
+  border-radius:30px;
+  z-index:1;
+  text-align:center;
+  vertical-align:middle;
+}
+
+footer.site-footer:hover{
+  opacity:1;
+}
+
+div.row{
+  margin-left:0px;
+  margin-right:0px;
+  display:flex;
+  flex-direction:row;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+
+div.col-sm-3.grey{
+  min-height:120px;
+  background-color:rgba(24, 111, 27, 0.8);
+}
+
+div.col-sm-3.black{
+  min-height:120px;
+  background-color:rgba(12, 81, 108, 0.8);
+}
+
+span.fa.feature-icons{
+  font-size:40px;
+  background-color:rgba(0,0,0,0.7);
+  width:100px;
+  height:100px;
+  border-radius:50%;
+  text-align:center;
+  line-height:100px;
+  vertical-align:middle;
+  border:2px solid #fff;
+  margin-top:10px;
+}
+
+a.navbar-brand.navbar-link {
+  color:#fff;
+}
+
+div.overlay {
+  background-color:rgba(255,255,255,0.7);
+  visibility:hidden;
+  height:0;
+  right:0;
+  left:0;
+  transition:height .6s ease-out;
+  position:absolute;
+  text-align:center;
+  color:#000;
+  height:20px;
+  z-index:1;
+  font-size:smaller;
+}
+
+div.col-sm-3:hover .overlay {
+  visibility:visible;
+  height:100%;
+  transition:all .5s ease;
+}
+
+div.jumbotron.hero {
+  background-image:url(../../assets/img/KIPIT.jpg);
+  background-size:cover;
+  min-height:500px;
+  max-height:600px;
+  background-repeat:no-repeat;
+  background-position:center;
+  margin-top:50px;
+}
+
+div.col-sm-3 {
+  display:flex;
+  justify-content:center;
+}

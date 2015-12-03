@@ -7,7 +7,7 @@ describe("Server", function() {
     it("Should respond to /", function(done) {
       request(app)
         .get("/")
-        .expect("Content-Type", /json/)
+        .expect("Content-Type", /text\/html/)
         .expect(200)
         .end(function(err, res) {
           if (err) return err;
