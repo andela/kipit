@@ -1,12 +1,9 @@
 // require modules
 var express = require("express");
 var db = require("./database");
+var client = db();
 var app = express();
 
-var client = db();
-
-app.get("/",function(req,res){
-  res.json("Send me");
-});
+app.use(express.static('public'));
 
 module.exports = app;

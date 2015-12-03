@@ -1,0 +1,26 @@
+[{
+  "name": "Feat one",
+  "description": "Kipit has extensive features that enables automated and self payment of bills on schedule and issuing of reminders",
+  "icons": "fa fa-money feature-icons"
+}, {
+  "name": "Feat Two",
+  "description": "Keep track of every expense from your wallet, cards, e.t.c by logging on kipit.",
+  "icons": "fa fa-external-link-square feature-icons"
+
+}, {
+  "name": "Feat Three",
+  "description": "Create and update budget from an analysis of expense using our our analytic tools.",
+  "icons": "fa fa-newspaper-o feature-icons"
+}, {
+  "name": "Feat Four",
+  "description": "Kipit provides updates on account status and generates summary reports over a specified period.",
+  "icons": "fa fa-arrow-circle-o-down feature-icons"
+}, {
+  "name": "Feat Five",
+  "description": "Access to support via chat.",
+  "icons": "fa fa-wechat feature-icons"
+}, {
+  "name": "Feat Six",
+  "description": "kipit monitors the market and provides useful tips on investments from trusted sources.",
+  "icons": "fa fa-gittip feature-icons"
+}]
